@@ -49,6 +49,10 @@
 			let singleStepMode = false;
 			let sizeOfNextStep = 0;
 
+			const meshObjects = [];
+
+			meshObjects.count = 512;
+			
 			init();
 
 			function init() {
@@ -84,6 +88,7 @@
 
 				// ground
 
+
 				const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0xcbcbcb, depthWrite: false } ) );
 				mesh.rotation.x = - Math.PI / 2;
 				mesh.receiveShadow = true;
@@ -95,9 +100,32 @@
 					model = gltf.scene;
 					scene.add( model );
 
+					const dummy = new THREE.Object3D();
+					const imesh = new THREE.InstancedMesh( new THREE.PlaneGeometry(), new THREE.MeshBasicMaterial(), 1024 );
+
+					for ( let i = 0; i < 1024; i ++ ) {
+
+						dummy.position.y = - i * 50;
+						dummy.updateMatrix();
+						imesh.setMatrixAt( i, dummy.matrix );
+
+					}
+
 					model.traverse( function ( object ) {
 
-						if ( object.isMesh ) object.castShadow = true;
+						if ( object.isMesh ) {
+
+							meshObjects.push(object);
+
+							object.material = new THREE.MeshNormalMaterial();
+							object.isInstancedMesh = true;
+							object.instanceMatrix = imesh.instanceMatrix;
+							object.instanceColor = null;
+							object.castShadow = true;
+							object.morphTexture = null;
+							object.count = meshObjects.count;
+
+						}
 
 					} );
 
@@ -133,7 +161,7 @@
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.shadowMap.enabled = true;
+				//renderer.shadowMap.enabled = true;
 				container.appendChild( renderer.domElement );
 
 				stats = new Stats();
@@ -146,6 +174,8 @@
 			function createPanel() {
 
 				const panel = new GUI( { width: 310 } );
+
+				panel.add( meshObjects, 'count', 1, 1024, 1 ).onChange( (v) => meshObjects.forEach((o) => o.count = v) );
 
 				const folder1 = panel.addFolder( 'Visibility' );
 				const folder2 = panel.addFolder( 'Activation/Deactivation' );

@@ -9198,7 +9198,7 @@ class Material extends EventDispatcher {
 		if ( this.sheenColor && this.sheenColor.isColor ) data.sheenColor = this.sheenColor.getHex();
 		if ( this.sheenRoughness !== undefined ) data.sheenRoughness = this.sheenRoughness;
 		if ( this.emissive && this.emissive.isColor ) data.emissive = this.emissive.getHex();
-		if ( this.emissiveIntensity && this.emissiveIntensity !== 1 ) data.emissiveIntensity = this.emissiveIntensity;
+		if ( this.emissiveIntensity !== undefined && this.emissiveIntensity !== 1 ) data.emissiveIntensity = this.emissiveIntensity;
 
 		if ( this.specular && this.specular.isColor ) data.specular = this.specular.getHex();
 		if ( this.specularIntensity !== undefined ) data.specularIntensity = this.specularIntensity;
@@ -16325,6 +16325,7 @@ class PMREMGenerator {
 	 * Generates a PMREM from an equirectangular texture, which can be either LDR
 	 * or HDR. The ideal input image size is 1k (1024 x 512),
 	 * as this matches best with the 256 x 256 cubemap output.
+	 * The smallest supported equirectangular image size is 64 x 32.
 	 */
 	fromEquirectangular( equirectangular, renderTarget = null ) {
 
@@ -16336,6 +16337,7 @@ class PMREMGenerator {
 	 * Generates a PMREM from an cubemap texture, which can be either LDR
 	 * or HDR. The ideal input cube size is 256 x 256,
 	 * as this matches best with the 256 x 256 cubemap output.
+	 * The smallest supported cube size is 16 x 16.
 	 */
 	fromCubemap( cubemap, renderTarget = null ) {
 
@@ -31021,8 +31023,8 @@ class WebGLRenderer {
 
 			}
 
-			const width = sourceBox.max.x - sourceBox.min.x + 1;
-			const height = sourceBox.max.y - sourceBox.min.y + 1;
+			const width = Math.round( sourceBox.max.x - sourceBox.min.x );
+			const height = Math.round( sourceBox.max.y - sourceBox.min.y );
 			const depth = sourceBox.max.z - sourceBox.min.z + 1;
 			const glFormat = utils.convert( dstTexture.format );
 			const glType = utils.convert( dstTexture.type );
@@ -31069,9 +31071,8 @@ class WebGLRenderer {
 
 			} else {
 
-				if ( srcTexture.isCompressedArrayTexture ) {
+				if ( dstTexture.isCompressedArrayTexture ) {
 
-					console.warn( 'THREE.WebGLRenderer.copyTextureToTexture3D: untested support for compressed srcTexture.' );
 					_gl.compressedTexSubImage3D( glTarget, level, position.x, position.y, position.z, width, height, depth, glFormat, image.data );
 
 				} else {
