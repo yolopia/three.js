@@ -117,6 +117,7 @@
 
 							meshObjects.push(object);
 
+							object.material = new THREE.MeshNormalMaterial();
 							object.isInstancedMesh = true;
 							object.instanceMatrix = imesh.instanceMatrix;
 							object.instanceColor = null;
@@ -160,7 +161,7 @@
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.shadowMap.enabled = true;
+				//renderer.shadowMap.enabled = true;
 				container.appendChild( renderer.domElement );
 
 				stats = new Stats();
